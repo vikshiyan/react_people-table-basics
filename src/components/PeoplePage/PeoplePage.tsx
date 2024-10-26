@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { PersonLink } from '../PersonLink';
 import cn from 'classnames';
@@ -6,14 +6,30 @@ import cn from 'classnames';
 import { getPeople } from '../../api';
 import { Person } from '../../types';
 import { Loader } from '../Loader';
+import { getHuman } from '../../utils/getHuman';
 
-export const PeoplePage: React.FC = () => {
+export const PeoplePage: FC = () => {
   const [people, setPeople] = useState<Person[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
   const { slug } = useParams();
   const selectedPerson = slug;
+  const isPeopleListEmpty = people.length === 0 && !loading && !error;
+
+  const renderHuman = (humanName: string | null) => {
+    const human = getHuman(humanName, people);
+
+    if (!human) {
+      return '-';
+    }
+
+    if (typeof human !== 'string') {
+      return <PersonLink person={human} />;
+    }
+
+    return humanName;
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -39,7 +55,7 @@ export const PeoplePage: React.FC = () => {
               </p>
             )}
 
-            {people.length === 0 && !loading && !error && (
+            {isPeopleListEmpty && (
               <p data-cy="noPeopleMessage">There are no people on the server</p>
             )}
 
@@ -60,32 +76,6 @@ export const PeoplePage: React.FC = () => {
                 </thead>
                 <tbody>
                   {people.map(person => {
-                    const getHuman = (humanName: string | null) => {
-                      if (!humanName) {
-                        return null;
-                      }
-
-                      const foundPerson = people.find(
-                        p => p.name === humanName,
-                      );
-
-                      return foundPerson ? foundPerson : humanName;
-                    };
-
-                    const renderHuman = (humanName: string | null) => {
-                      const human = getHuman(humanName);
-
-                      if (!human) {
-                        return '-';
-                      }
-
-                      if (typeof human !== 'string') {
-                        return <PersonLink person={human} />;
-                      }
-
-                      return humanName;
-                    };
-
                     return (
                       <tr
                         data-cy="person"
