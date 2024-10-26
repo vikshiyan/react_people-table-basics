@@ -36,7 +36,10 @@ export const PeoplePage: FC = () => {
 
     getPeople()
       .then(setPeople)
-      .catch(() => setError(true))
+      .catch(() => {
+        setPeople([]);
+        setError(true);
+      })
       .finally(() => setLoading(false));
   }, []);
 
